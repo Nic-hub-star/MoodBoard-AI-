@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodBoard AI - Smart Mood-Based Design Generator</title>
+    <style>
+        :root {
+            --primary: #5D4FEF;
+            --primary-light: #9B95F5;
+            --secondary: #FF9F78;
+            --dark: #252836;
+            --light: #F5F5FC;
+            --success: #66D9A8;
+            --warning: #FFD586;
+            --error: #FF7474;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .logo-text {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .controls {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .mood-selector {
+            margin-bottom: 2rem;
+        }
+
+        .mood-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .mood-btn {
+            background-color: var(--light);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .mood-btn:hover {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .mood-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .color-palette {
+            margin-bottom: 2rem;
+        }
+
+        .palette-preview {
+            display: flex;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 3rem;
+        }
+
+        .color-block {
+            flex: 1;
+            height: 100%;
+        }
+
+        .palette-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .generate-palette {
+            flex: 1;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .generate-palette:hover {
+            background-color: var(--primary-light);
+        }
+
+        .copy-palette {
+            background-color: var(--light);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .copy-palette:hover {
+            background-color: #e0e0e8;
+        }
+
+        .font-selector {
+            margin-bottom: 2rem;
+        }
+
+        .font-preview {
+            background-color: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .font-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .font-text {
+            color: #555;
+        }
+
+        .font-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .prev-font, .next-font {
+            flex: 1;
+            background-color: var(--light);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .prev-font:hover, .next-font:hover {
+            background-color: #e0e0e8;
+        }
+
+        .generate-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--primary-light);
+        }
+
+        .moodboard {
+            background-color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .moodboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .moodboard-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .download-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-btn:hover {
+            opacity: 0.9;
+        }
+
+        .moodboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 180px);
+            gap: 1rem;
+        }
+
+        .moodboard-item {
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .item-large {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .item-medium {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .item-small {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .moodboard-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .color-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .font-display {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .no-moodboard {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            color: #aaa;
+        }
+
+        .no-moodboard i {
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+
+        .no-moodboard p {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                order: 1;
+            }
+            
+            .moodboard {
+                order: 2;
+            }
+            
+            .moodboard-grid {
+                grid-template-rows: repeat(4, 150px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mood-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .moodboard-grid {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: repeat(5, 120px);
+            }
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: var(--success);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .message.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span><i class="fas fa-palette"></i></span>
+            <div class="logo-text">MoodBoard AI</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="controls">
+                <div class="mood-selector">
+                    <h3 class="section-title">Select Mood</h3>
+                    <div class="mood-options">
+                        <button class="mood-btn" data-mood="energetic">Energetic</button>
+                        <button class="mood-btn" data-mood="calm">Calm</button>
+                        <button class="mood-btn" data-mood="playful">Playful</button>
+                        <button class="mood-btn" data-mood="elegant">Elegant</button>
+                        <button class="mood-btn" data-mood="modern">Modern</button>
+                        <button class="mood-btn" data-mood="vintage">Vintage</button>
+                        <button class="mood-btn" data-mood="minimalist">Minimalist</button>
+                        <button class="mood-btn" data-mood="bold">Bold</button>
+                    </div>
+                </div>
+
+                <div class="color-palette">
+                    <h3 class="section-title">Color Palette</h3>
+                    <div class="palette-preview">
+                        <div class="color-block" id="color1"></div>
+                        <div class="color-block" id="color2"></div>
+                        <div class="color-block" id="color3"></div>
+                        <div class="color-block" id="color4"></div>
+                        <div class="color-block" id="color5"></div>
+                    </div>
+                    <div class="palette-controls">
+                        <button class="generate-palette">Generate Palette</button>
+                        <button class="copy-palette" title="Copy palette codes"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="font-selector">
+                    <h3 class="section-title">Font Pairing</h3>
+                    <div class="font-preview">
+                        <div class="font-title" id="font-heading">Heading Font</div>
+                        <div class="font-text" id="font-body">This is how your body text will look like in the selected font pairing.</div>
+                    </div>
+                    <div class="font-controls">
+                        <button class="prev-font"><i class="fas fa-chevron-left"></i></button>
+                        <button class="next-font"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <button class="generate-btn">Generate Moodboard</button>
+            </div>
+
+            <div class="moodboard">
+                <div class="moodboard-header">
+                    <h2 class="moodboard-title">Your Moodboard</h2>
+                    <button class="download-btn"><i class="fas fa-download"></i> Download</button>
+                </div>
+                
+                <div class="no-moodboard" id="empty-state">
+                    <i class="fas fa-image"></i>
+                    <p>Select a mood and generate your moodboard</p>
+                </div>
+
+                <div class="moodboard-grid" id="moodboard-content" style="display: none;">
+                    <div class="moodboard-item item-large">
+                        <img src="/api/placeholder/400/320" alt="Mood inspiration image" class="moodboard-img">
+                    </div>
+                    <div class="moodboard-item item-small">
+                        <div class="color-display" id="display-color1">
+                            #FF5733
+                        </div>
+                    </div>
+                    <div class="moodboard-item item-small">
+                        <div class="color-display" id="display-color2">
+                            #33FF57
+                        </div>
+                    </div>
+                    <div class="moodboard-item item-medium">
+                        <img src="/api/placeholder/200/320" alt="Mood inspiration image" class="moodboard-img">
+                    </div>
+                    <div class="moodboard-item item-small">
+                        <div class="font-display">
+                            <h4 style="font-size: 1.2rem;">Heading</h4>
+                            <p style="font-size: 0.9rem;">Body text sample</p>
+                        </div>
+                    </div>
+                    <div class="moodboard-item item-small">
+                        <div class="color-display" id="display-color3">
+                            #5733FF
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="message" id="message">Palette copied to clipboard!</div>
+
+    <script>
+        // Mood board AI application
+        const app = {
+            // Current selected mood
+            currentMood: null,
+            
+            // Color palette
+            colorPalette: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
+            
+            // Font pairings array
+            fontPairings: [
+                { heading: "'Montserrat', sans-serif", body: "'Open Sans', sans-serif", name: "Montserrat & Open Sans" },
+                { heading: "'Playfair Display', serif", body: "'Source Sans Pro', sans-serif", name: "Playfair & Source Sans" },
+                { heading: "'Oswald', sans-serif", body: "'Roboto', sans-serif", name: "Oswald & Roboto" },
+                { heading: "'Raleway', sans-serif", body: "'Lato', sans-serif", name: "Raleway & Lato" },
+                { heading: "'Merriweather', serif", body: "'Roboto', sans-serif", name: "Merriweather & Roboto" },
+                { heading: "'Poppins', sans-serif", body: "'Work Sans', sans-serif", name: "Poppins & Work Sans" },
+                { heading: "'Abril Fatface', display", body: "'Nunito', sans-serif", name: "Abril & Nunito" },
+                { heading: "'Lora', serif", body: "'Source Sans Pro', sans-serif", name: "Lora & Source Sans" }
+            ],
+            
+            // Current font pairing index
+            currentFontIndex: 0,
+            
+            // Mood-based palettes
+            moodPalettes: {
+                energetic: [
+                    ['#FF5733', '#FF8D33', '#FFBD33', '#FFF033', '#33FFF0'],
+                    ['#FF3366', '#FF6B33', '#FFD133', '#33FFB8', '#339CFF'],
+                    ['#FF2D00', '#FF8700', '#FFE400', '#00FF87', '#008BFF']
+                ],
+                calm: [
+                    ['#86A8E7', '#91EAE4', '#7F7FD5', '#5FFBF1', '#D8B5FF'],
+                    ['#74EBD5', '#ACB6E5', '#6DD5FA', '#FFFFFF', '#9FACE6'],
+                    ['#83A4D4', '#B6FBFF', '#B2FEFA', '#D4FC79', '#96E6A1']
+                ],
+                playful: [
+                    ['#FF9A8B', '#FF6A88', '#FF99AC', '#FCF6BD', '#D0F4DE'],
+                    ['#F7E8A6', '#F193D5', '#FF6BA9', '#BFFCC6', '#C4FAF8'],
+                    ['#FFD3B6', '#FFAAA5', '#FF8B94', '#FDFFB6', '#A0DAA9']
+                ],
+                elegant: [
+                    ['#2C3E50', '#E9E9E9', '#1ABC9C', '#F5F5F5', '#34495E'],
+                    ['#292929', '#F9F9F9', '#D4AF37', '#4D4D4D', '#E8E8E8'],
+                    ['#4A4A4A', '#F0F0F0', '#9B8347', '#FFFFFF', '#262626']
+                ],
+                modern: [
+                    ['#121212', '#F5F5F7', '#007AFF', '#F7F7F7', '#464646'],
+                    ['#000000', '#FFFFFF', '#FF2D55', '#F2F2F2', '#333333'],
+                    ['#1A1A1A', '#FAFAFA', '#FF3B30', '#E5E5E5', '#555555']
+                ],
+                vintage: [
+                    ['#ECDCC2', '#BC987E', '#634B3B', '#AD9079', '#D8CAAF'],
+                    ['#E8D6CB', '#A78A7F', '#735751', '#D1B7A0', '#F3EDE3'],
+                    ['#D7CEB2', '#99864C', '#594A26', '#B5A678', '#E2DFC9']
+                ],
+                minimalist: [
+                    ['#FFFFFF', '#F5F5F5', '#000000', '#E0E0E0', '#858585'],
+                    ['#FAFAFA', '#F0F0F0', '#202020', '#EDEDED', '#A6A6A6'],
+                    ['#F7F7F7', '#EEEEEE', '#1A1A1A', '#DADADA', '#777777']
+                ],
+                bold: [
+                    ['#0F0F0F', '#FFFFFF', '#FF0000', '#F0F0F0', '#FF5E5E'],
+                    ['#000000', '#FFFFFF', '#FFD700', '#F2F2F2', '#FFA000'],
+                    ['#0A0A0A', '#FCFCFC', '#3498DB', '#F5F5F5', '#2380B8']
+                ]
+            },
+            
+            // Initialization
+            init() {
+                this.setupEventListeners();
+                this.updateFontPreview();
+                this.generateRandomPalette();
+            },
+            
+            // Set up all event listeners
+            setupEventListeners() {
+                // Mood selection
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.selectMood(e.target.dataset.mood);
+                    });
+                });
+                
+                // Generate palette button
+                document.querySelector('.generate-palette').addEventListener('click', () => {
+                    this.generateMoodPalette();
+                });
+                
+                // Copy palette button
+                document.querySelector('.copy-palette').addEventListener('click', () => {
+                    this.copyPaletteToClipboard();
+                });
+                
+                // Font navigation
+                document.querySelector('.prev-font').addEventListener('click', () => {
+                    this.navigateFont(-1);
+                });
+                
+                document.querySelector('.next-font').addEventListener('click', () => {
+                    this.navigateFont(1);
+                });
+                
+                // Generate moodboard
+                document.querySelector('.generate-btn').addEventListener('click', () => {
+                    this.generateMoodboard();
+                });
+                
+                // Download button
+                document.querySelector('.download-btn').addEventListener('click', () => {
+                    this.downloadMoodboard();
+                });
+            },
+            
+            // Select a mood
+            selectMood(mood) {
+                // Update current mood
+                this.currentMood = mood;
+                
+                // Update UI
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    if (btn.dataset.mood === mood) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                // Generate a palette based on the mood
+                this.generateMoodPalette();
+            },
+            
+            // Generate a color palette based on selected mood
+            generateMoodPalette() {
+                if (this.currentMood && this.moodPalettes[this.currentMood]) {
+                    // Get random palette from the mood's palettes
+                    const palettes = this.moodPalettes[this.currentMood];
+                    const randomIndex = Math.floor(Math.random() * palettes.length);
+                    this.colorPalette = palettes[randomIndex];
+                } else {
+                    // Default to random palette if no mood selected
+                    this.generateRandomPalette();
+                }
+                
+                // Update UI
+                this.updatePalettePreview();
+            },
+            
+            // Generate a random color palette
+            generateRandomPalette() {
+                for (let i = 0; i < 5; i++) {
+                    this.colorPalette[i] = this.getRandomColor();
+                }
+                this.updatePalettePreview();
+            },
+            
+            // Get a random hex color
+            getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            },
+            
+            // Update the palette preview in the UI
+            updatePalettePreview() {
+                for (let i = 1; i <= 5; i++) {
+                    const colorBlock = document.getElementById(color${i});
+                    if (colorBlock) {
+                        colorBlock.style.backgroundColor = this.colorPalette[i-1];
+                    }
+                }
+            },
+            
+            // Copy the palette colors to clipboard
+            copyPaletteToClipboard() {
+                const paletteText = this.colorPalette.join(', ');
+                navigator.clipboard.writeText(paletteText).then(() => {
+                    this.showMessage('Palette copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy palette: ', err);
+                    this.showMessage('Failed to copy palette');
+                });
+            },
+            
+            // Show a temporary message
+            showMessage(text) {
+                const message = document.getElementById('message');
+                message.textContent = text;
+                message.classList.add('show');
+                
+                setTimeout(() => {
+                    message.classList.remove('show');
+                }, 3000);
+            },
+            
+            // Navigate through font pairings
+            navigateFont(direction) {
+                this.currentFontIndex = (this.currentFontIndex + direction + this.fontPairings.length) % this.fontPairings.length;
+                this.updateFontPreview();
+            },
+            
+            // Update the font preview
+            updateFontPreview() {
+                const currentPairing = this.fontPairings[this.currentFontIndex];
+                const headingElement = document.getElementById('font-heading');
+                const bodyElement = document.getElementById('font-body');
+                
+                headingElement.style.fontFamily = currentPairing.heading;
+                bodyElement.style.fontFamily = currentPairing.body;
+                
+                headingElement.textContent = currentPairing.name.split('&')[0].trim();
+                bodyElement.textContent = This is body text in ${currentPairing.name.split('&')[1].trim()}. It shows how paragraphs will appear.;
+            },
+            
+            // Generate the moodboard
+            generateMoodboard() {
+                if (!this.currentMood) {
+                    this.showMessage('Please select a mood first!');
+                    return;
+                }
+                
+                // Hide empty state and show moodboard
+                document.getElementById('empty-state').style.display = 'none';
+                document.getElementById('moodboard-content').style.display = 'grid';
+                
+                // Update colors in the moodboard
+                for (let i = 1; i <= 3; i++) {
+                    const colorDisplay = document.getElementById(display-color${i});
+                    if (colorDisplay) {
+                        const colorIndex = i - 1;
+                        colorDisplay.textContent = this.colorPalette[colorIndex];
+                        colorDisplay.style.backgroundColor = this.colorPalette[colorIndex];
+                        
+                        // Set text color based on background brightness
+                        const rgb = this.hexToRgb(this.colorPalette[colorIndex]);
+                        const brightness = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+                        colorDisplay.style.color = brightness > 128 ? '#000000' : '#FFFFFF';
+                    }
+                }
+                
+                // Update fonts in the moodboard
+                const currentPairing = this.fontPairings[this.currentFontIndex];
+                const fontDisplay = document.querySelector('.font-display');
+                const heading = fontDisplay.querySelector('h4');
+                const body = fontDisplay.querySelector('p');
+                
+                heading.style.fontFamily = currentPairing.heading;
+                body.style.fontFamily = currentPairing.body;
+                
+                // Set title based on mood
+                document.querySelector('.moodboard-title').textContent = ${this.capitalizeFirstLetter(this.currentMood)} Moodboard;
+                
+                this.showMessage('Moodboard generated!');
+            },
+            
+            // Helper function to convert hex to RGB
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            },
+            
+            // Capitalize first letter
+            capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            },
+            
+            // Download moodboard (simplified implementation)
+            downloadMoodboard() {
+                this.showMessage('Moodboard download started!');
+                // In a real implementation, this would use html2canvas or similar
+                // to create an image of the moodboard and download it
+                
+                // Simulated download delay
+                setTimeout(() => {
+                    this.showMessage('Moodboard downloaded successfully!');
+                }, 2000);
+            }
+        };
+        
+        // Initialize the app when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
